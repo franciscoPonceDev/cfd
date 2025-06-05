@@ -3,7 +3,6 @@
     "name": "cfd",
     "slug": "cfd",
     "version": "1.0.0",
-
     "scheme": "cfd",
     "web": {
       "bundler": "metro",
@@ -21,21 +20,19 @@
     ],
     "experiments": {
       "typedRoutes": true,
-
       "tsconfigPaths": true
     },
-
     "orientation": "portrait",
     "icon": "./assets/icon.png",
-
     "userInterfaceStyle": "light",
-
     "splash": {
       "image": "./assets/splash.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
-    "assetBundlePatterns": ["**/*"],
+    "assetBundlePatterns": [
+      "**/*"
+    ],
     "ios": {
       "supportsTablet": true
     },
@@ -43,6 +40,13 @@
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
+      },
+      "package": "com.franciscoponcedev.cfd"
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "e4e13c3d-cc92-439c-a2d5-fefcb08d910e"
       }
     }
   }
