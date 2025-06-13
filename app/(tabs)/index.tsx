@@ -37,6 +37,11 @@ export default function HomeScreen() {
                   color="#9CA3AF"
                 />
               </TouchableOpacity>
+              <TouchableOpacity
+                onPress={() => router.push('/withdraw')}
+                className="ml-2 rounded-full bg-primary px-4 py-1">
+                <Text className="text-sm font-semibold text-white">Sacar</Text>
+              </TouchableOpacity>
             </View>
           </View>
           <TouchableOpacity className="h-10 w-10 items-center justify-center rounded-full bg-background-lighter">
@@ -55,13 +60,13 @@ export default function HomeScreen() {
           </View>
           <View className="flex-row items-center justify-between">
             <Text className="text-text-secondary">Saldo Atual</Text>
-            <Text className="text-lg font-semibold text-text">R$ 28.500,00</Text>
+            <Text className="text-lg font-semibold text-text">R$ 28.995,00</Text>
           </View>
           <View className="flex-row items-center justify-between">
             <Text className="text-text-secondary">Retorno Total</Text>
             <View className="space-y-1">
-              <Text className="text-lg font-semibold text-primary">+R$ 3.500,00</Text>
-              <Text className="text-sm text-primary">+14%</Text>
+              <Text className="text-lg font-semibold text-primary">+R$ 3.995,00</Text>
+              <Text className="text-sm text-primary">+15,98%</Text>
             </View>
           </View>
         </View>

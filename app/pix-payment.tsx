@@ -10,13 +10,14 @@ import {
 } from 'react-native';
 import { Stack, router, useLocalSearchParams } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { useFundsStore } from '~/store/store';
+import { useFundsStore, useTransactionsStore } from '~/store/store';
 
 export default function PixPaymentScreen() {
   const [isLoading, setIsLoading] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   const { amount } = useLocalSearchParams<{ amount: string }>();
   const { addFunds } = useFundsStore();
+  const { addTransaction } = useTransactionsStore();
 
   // Convert amount to number and format
   const amountValue = parseFloat(amount || '0');
@@ -49,6 +50,15 @@ export default function PixPaymentScreen() {
 
       // Add funds to the store
       addFunds(amountValue);
+
+      // Add transaction to the store
+      addTransaction({
+        type: 'deposit',
+        amount: amountValue,
+        description: 'Depósito via PIX',
+        status: 'completed',
+        paymentMethod: 'PIX',
+      });
 
       setShowSuccess(true);
 
@@ -125,83 +135,77 @@ export default function PixPaymentScreen() {
         </View>
       </Modal>
 
-      <ScrollView className="flex-1 px-6 py-4" contentContainerStyle={{ paddingBottom: 40 }}>
-        {/* Payment Details */}
-        <View className="mb-6 rounded-xl bg-background-light p-6 shadow-sm">
-          <Text className="mb-4 text-xl font-bold text-text">Detalhes do Pagamento</Text>
-
-          <View className="space-y-3">
-            <View className="flex-row justify-between">
-              <Text className="text-text-secondary">Destinatário</Text>
-              <Text className="font-medium text-text">{pixPaymentData.recipientName}</Text>
-            </View>
-
-            <View className="flex-row justify-between">
-              <Text className="text-text-secondary">Valor</Text>
-              <Text className="text-lg font-bold text-primary">{pixPaymentData.amount}</Text>
-            </View>
-
-            <View className="flex-row justify-between">
-              <Text className="text-text-secondary">Chave Pix</Text>
-              <Text className="font-medium text-text">{pixPaymentData.pixKey}</Text>
-            </View>
+      <ScrollView className="flex-1 px-6 py-4">
+        <View className="space-y-6">
+          {/* Amount Summary */}
+          <View className="rounded-lg bg-background-light p-6">
+            <Text className="text-center text-sm text-text-secondary">Valor do Depósito</Text>
+            <Text className="text-center text-3xl font-bold text-primary">{formattedAmount}</Text>
           </View>
-        </View>
 
-        {/* QR Code Section */}
-        <View className="mb-6 rounded-xl bg-background-light p-6 shadow-sm">
-          <Text className="mb-4 text-center text-xl font-bold text-text">QR Code</Text>
-
-          <View className="mb-4 items-center justify-center">
-            <View className="h-48 w-48 items-center justify-center rounded-xl border border-gray-200 bg-white">
-              <Text className="text-6xl">▣</Text>
-              <Text className="mt-2 text-xs text-gray-500">QR Code Simulado</Text>
+          {/* Pix Code Section */}
+          <View className="space-y-4">
+            <Text className="text-lg font-semibold text-text">Código Pix</Text>
+            <View className="rounded-lg bg-background-light p-4">
+              <Text className="mb-2 text-sm text-text-secondary">
+                Copie o código abaixo e cole no seu aplicativo de pagamento
+              </Text>
+              <TouchableOpacity
+                onPress={copyPixCode}
+                className="rounded-lg border border-border bg-background-lighter p-4">
+                <Text className="font-mono text-sm text-text">{pixPaymentData.pixCode}</Text>
+              </TouchableOpacity>
             </View>
           </View>
 
-          <Text className="text-center text-sm text-text-secondary">
-            Escaneie o QR Code com seu app bancário
-          </Text>
-        </View>
-
-        {/* Pix Code Section */}
-        <View className="mb-6 rounded-xl bg-background-light p-6 shadow-sm">
-          <Text className="mb-4 text-xl font-bold text-text">Código Pix</Text>
-
-          <View className="mb-4 rounded-lg bg-background-lighter p-4">
-            <Text className="font-mono text-xs text-text">{pixPaymentData.pixCode}</Text>
+          {/* Instructions */}
+          <View className="rounded-lg bg-background-light p-4">
+            <Text className="mb-2 text-lg font-semibold text-text">Instruções</Text>
+            <View className="space-y-2">
+              <View className="flex-row items-start space-x-2">
+                <Ionicons name="ellipse" size={20} color="#9CA3AF" />
+                <Text className="flex-1 text-sm text-text-secondary">
+                  Abra o aplicativo do seu banco e selecione a opção de pagamento via Pix
+                </Text>
+              </View>
+              <View className="flex-row items-start space-x-2">
+                <Ionicons name="ellipse" size={20} color="#9CA3AF" />
+                <Text className="flex-1 text-sm text-text-secondary">
+                  Cole o código Pix copiado ou escaneie o QR Code
+                </Text>
+              </View>
+              <View className="flex-row items-start space-x-2">
+                <Ionicons name="ellipse" size={20} color="#9CA3AF" />
+                <Text className="flex-1 text-sm text-text-secondary">
+                  Confirme os dados e finalize o pagamento
+                </Text>
+              </View>
+              <View className="flex-row items-start space-x-2">
+                <Ionicons name="ellipse" size={20} color="#9CA3AF" />
+                <Text className="flex-1 text-sm text-text-secondary">
+                  Após o pagamento, clique em &quot;Confirmar Pagamento&quot; abaixo
+                </Text>
+              </View>
+            </View>
           </View>
-
-          <TouchableOpacity
-            onPress={copyPixCode}
-            className="flex-row items-center justify-center rounded-lg bg-primary px-4 py-3">
-            <Ionicons name="copy-outline" size={20} color="#FFFFFF" />
-            <Text className="ml-2 font-medium text-white">Copiar Código</Text>
-          </TouchableOpacity>
         </View>
+      </ScrollView>
 
-        {/* Simulation Warning */}
-        <View className="mb-6 rounded-xl border border-yellow-200 bg-yellow-50 p-4">
-          <View className="mb-2 flex-row items-center">
-            <Ionicons name="warning-outline" size={20} color="#F59E0B" />
-            <Text className="ml-2 font-medium text-yellow-800">Simulação</Text>
-          </View>
-          <Text className="text-sm text-yellow-700">
-            Este é um pagamento simulado. Ao confirmar, você estará apenas testando o fluxo da
-            aplicação.
-          </Text>
-        </View>
-
-        {/* Confirm Button */}
+      {/* Confirm Button */}
+      <View className="border-t border-border bg-background p-6">
         <TouchableOpacity
           onPress={handleConfirmPayment}
           disabled={isLoading}
-          className={`rounded-xl px-6 py-4 ${isLoading ? 'bg-gray-400' : 'bg-primary'} shadow-md`}>
-          <Text className="text-center text-lg font-semibold text-white">
-            Confirmar Pagamento (Simulação)
-          </Text>
+          className="rounded-lg bg-primary py-4">
+          {isLoading ? (
+            <ActivityIndicator color="#FFFFFF" />
+          ) : (
+            <Text className="text-center text-lg font-semibold text-white">
+              Confirmar Pagamento
+            </Text>
+          )}
         </TouchableOpacity>
-      </ScrollView>
+      </View>
     </View>
   );
 }

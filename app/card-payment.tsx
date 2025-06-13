@@ -11,13 +11,14 @@ import {
 } from 'react-native';
 import { Stack, router, useLocalSearchParams } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { useFundsStore } from '~/store/store';
+import { useFundsStore, useTransactionsStore } from '~/store/store';
 
 export default function CardPaymentScreen() {
   const [isLoading, setIsLoading] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   const { amount } = useLocalSearchParams<{ amount: string }>();
   const { addFunds } = useFundsStore();
+  const { addTransaction } = useTransactionsStore();
 
   // Form states
   const [cardNumber, setCardNumber] = useState('');
@@ -59,6 +60,16 @@ export default function CardPaymentScreen() {
     setTimeout(() => {
       setIsLoading(false);
       addFunds(amountValue);
+
+      // Add transaction to the store
+      addTransaction({
+        type: 'deposit',
+        amount: amountValue,
+        description: 'Depósito via Cartão',
+        status: 'completed',
+        paymentMethod: 'Cartão de Crédito/Débito',
+      });
+
       setShowSuccess(true);
 
       // Navigate back to home after showing success for 3 seconds
@@ -132,94 +143,101 @@ export default function CardPaymentScreen() {
         </View>
       </Modal>
 
-      <ScrollView className="flex-1 px-6 py-4" contentContainerStyle={{ paddingBottom: 40 }}>
-        {/* Payment Amount */}
-        <View className="mb-6 rounded-xl bg-background-light p-6 shadow-sm">
-          <Text className="mb-2 text-text-secondary">Valor Total</Text>
-          <Text className="text-2xl font-bold text-primary">{formattedAmount}</Text>
-        </View>
+      <ScrollView className="flex-1 px-6 py-4">
+        <View className="space-y-6">
+          {/* Amount Summary */}
+          <View className="rounded-lg bg-background-light p-6">
+            <Text className="text-center text-sm text-text-secondary">Valor do Depósito</Text>
+            <Text className="text-center text-3xl font-bold text-primary">{formattedAmount}</Text>
+          </View>
 
-        {/* Card Form */}
-        <View className="mb-6 rounded-xl bg-background-light p-6 shadow-sm">
-          <Text className="mb-4 text-xl font-bold text-text">Dados do Cartão</Text>
-
-          <View className="gap-3 space-y-4">
-            <View>
-              <Text className="mb-2 text-text-secondary">Número do Cartão</Text>
-              <TextInput
-                className="rounded-lg border border-gray-200 bg-white px-4 py-3 text-gray-900"
-                placeholder="0000 0000 0000 0000"
-                placeholderTextColor="#9CA3AF"
-                keyboardType="numeric"
-                maxLength={19}
-                value={cardNumber}
-                onChangeText={(text) => setCardNumber(formatCardNumber(text))}
-              />
-            </View>
-
-            <View>
-              <Text className="mb-2 text-text-secondary">Nome no Cartão</Text>
-              <TextInput
-                className="rounded-lg border border-gray-200 bg-white px-4 py-3 text-gray-900"
-                placeholder="Nome como está no cartão"
-                placeholderTextColor="#9CA3AF"
-                value={cardHolder}
-                onChangeText={setCardHolder}
-                autoCapitalize="characters"
-              />
-            </View>
-
-            <View className="flex-row gap-2 space-x-4">
-              <View className="flex-1">
-                <Text className="mb-2 text-text-secondary">Validade</Text>
+          {/* Card Form */}
+          <View className="space-y-4">
+            <Text className="text-lg font-semibold text-text">Dados do Cartão</Text>
+            <View className="space-y-4">
+              {/* Card Number */}
+              <View>
+                <Text className="mb-2 text-sm text-text-secondary">Número do Cartão</Text>
                 <TextInput
-                  className="rounded-lg border border-gray-200 bg-white px-4 py-3 text-gray-900"
-                  placeholder="MM/AA"
+                  className="rounded-lg bg-background-light p-4 text-text"
+                  placeholder="0000 0000 0000 0000"
                   placeholderTextColor="#9CA3AF"
                   keyboardType="numeric"
-                  maxLength={5}
-                  value={expiryDate}
-                  onChangeText={(text) => setExpiryDate(formatExpiryDate(text))}
+                  maxLength={19}
+                  value={cardNumber}
+                  onChangeText={(text) => setCardNumber(formatCardNumber(text))}
                 />
               </View>
-              <View className="flex-1">
-                <Text className="mb-2 text-text-secondary">CVV</Text>
+
+              {/* Card Holder */}
+              <View>
+                <Text className="mb-2 text-sm text-text-secondary">Nome no Cartão</Text>
                 <TextInput
-                  className="rounded-lg border border-gray-200 bg-white px-4 py-3 text-gray-900"
-                  placeholder="123"
+                  className="rounded-lg bg-background-light p-4 text-text"
+                  placeholder="Nome como está no cartão"
                   placeholderTextColor="#9CA3AF"
-                  keyboardType="numeric"
-                  maxLength={3}
-                  value={cvv}
-                  onChangeText={setCvv}
+                  value={cardHolder}
+                  onChangeText={setCardHolder}
                 />
+              </View>
+
+              {/* Expiry Date and CVV */}
+              <View className="flex-row space-x-4">
+                <View className="flex-1">
+                  <Text className="mb-2 text-sm text-text-secondary">Validade</Text>
+                  <TextInput
+                    className="rounded-lg bg-background-light p-4 text-text"
+                    placeholder="MM/AA"
+                    placeholderTextColor="#9CA3AF"
+                    keyboardType="numeric"
+                    maxLength={5}
+                    value={expiryDate}
+                    onChangeText={(text) => setExpiryDate(formatExpiryDate(text))}
+                  />
+                </View>
+                <View className="flex-1">
+                  <Text className="mb-2 text-sm text-text-secondary">CVV</Text>
+                  <TextInput
+                    className="rounded-lg bg-background-light p-4 text-text"
+                    placeholder="123"
+                    placeholderTextColor="#9CA3AF"
+                    keyboardType="numeric"
+                    maxLength={3}
+                    value={cvv}
+                    onChangeText={setCvv}
+                  />
+                </View>
               </View>
             </View>
           </View>
-        </View>
 
-        {/* Simulation Warning */}
-        <View className="mb-6 rounded-xl border border-yellow-200 bg-yellow-50 p-4">
-          <View className="mb-2 flex-row items-center">
-            <Ionicons name="warning-outline" size={20} color="#F59E0B" />
-            <Text className="ml-2 font-medium text-yellow-800">Simulação</Text>
+          {/* Security Notice */}
+          <View className="rounded-lg bg-background-light p-4">
+            <View className="flex-row items-center space-x-2">
+              <Ionicons name="shield-checkmark" size={20} color="#9CA3AF" />
+              <Text className="text-sm text-text-secondary">
+                Seus dados estão seguros e criptografados
+              </Text>
+            </View>
           </View>
-          <Text className="text-sm text-yellow-700">
-            Este é um pagamento simulado. Ao confirmar, você estará apenas testando o fluxo da
-            aplicação.
-          </Text>
         </View>
+      </ScrollView>
 
-        {/* Confirm Button */}
+      {/* Confirm Button */}
+      <View className="border-t border-border bg-background p-6">
         <TouchableOpacity
           onPress={handleConfirmPayment}
           disabled={isLoading}
-          className={`rounded-xl px-6 py-4 ${isLoading ? 'bg-gray-400' : 'bg-primary'} shadow-md`}>
-          <Text className="text-center text-lg font-semibold text-white">
-            Confirmar Pagamento (Simulação)
-          </Text>
+          className="rounded-lg bg-primary py-4">
+          {isLoading ? (
+            <ActivityIndicator color="#FFFFFF" />
+          ) : (
+            <Text className="text-center text-lg font-semibold text-white">
+              Confirmar Pagamento
+            </Text>
+          )}
         </TouchableOpacity>
-      </ScrollView>
+      </View>
     </View>
   );
 }

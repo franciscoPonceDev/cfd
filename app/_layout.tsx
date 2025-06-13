@@ -39,6 +39,26 @@ export default function RootLayout() {
         }}
       />
       <Stack.Screen
+        name="withdraw"
+        options={{
+          headerShown: true,
+          headerStyle: {
+            backgroundColor: '#111827',
+          },
+          headerTintColor: '#F9FAFB',
+        }}
+      />
+      <Stack.Screen
+        name="withdraw-confirm"
+        options={{
+          headerShown: true,
+          headerStyle: {
+            backgroundColor: '#111827',
+          },
+          headerTintColor: '#F9FAFB',
+        }}
+      />
+      <Stack.Screen
         name="modal"
         options={{
           presentation: 'modal',
