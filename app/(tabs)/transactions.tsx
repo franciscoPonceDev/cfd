@@ -116,7 +116,7 @@ export default function TransactionsScreen() {
               key={transaction.id}
               className="mb-3 rounded-xl bg-background-light p-4 shadow-sm">
               <View className="mb-2 flex-row items-center justify-between">
-                <View className="flex-row items-center">
+                <View className="flex-shrink flex-row items-center">
                   <View className="mr-3 h-10 w-10 items-center justify-center rounded-full bg-background-lighter">
                     <Ionicons
                       name={getTransactionIcon(transaction.type)}
@@ -124,7 +124,7 @@ export default function TransactionsScreen() {
                       color={getTransactionColor(transaction.type)}
                     />
                   </View>
-                  <View>
+                  <View className="flex-shrink">
                     <Text className="font-semibold text-text">{transaction.description}</Text>
                     <Text className="text-sm text-text-muted">
                       {transaction.paymentMethod || transaction.type}

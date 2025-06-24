@@ -21,9 +21,24 @@ export default function WithdrawScreen() {
   const bankAccounts = getAccounts();
 
   const handleAmountChange = (text: string) => {
-    // Remove any existing currency formatting
+    // Remove any non-numeric characters
     const cleanText = text.replace(/[^\d]/g, '');
-    const formatted = formatCurrency(cleanText);
+
+    // Convert to number and format
+    const numericValue = parseInt(cleanText, 10);
+    if (isNaN(numericValue)) {
+      setAmount('');
+      return;
+    }
+
+    // Format as currency (R$ XX,XX)
+    const formatted = (numericValue / 100).toLocaleString('pt-BR', {
+      style: 'currency',
+      currency: 'BRL',
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    });
+
     setAmount(formatted);
   };
 
@@ -92,7 +107,7 @@ export default function WithdrawScreen() {
           </View>
 
           {/* Account Selection */}
-          <View className="gap-2 space-y-2">
+          <View className="space-y-2r gap-2">
             <Text className="text-lg font-semibold text-text">Conta de Destino</Text>
             <View className="flex flex-col gap-2 space-y-2">
               {bankAccounts.map((account) => (

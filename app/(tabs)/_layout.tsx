@@ -1,5 +1,6 @@
 import { Tabs } from 'expo-router';
-import { Ionicons } from '@expo/vector-icons';
+import { Ionicons, MaterialIcons } from '@expo/vector-icons';
+import { View, Text } from 'react-native';
 
 export default function TabLayout() {
   return (
@@ -12,8 +13,8 @@ export default function TabLayout() {
           borderTopColor: '#374151',
           backgroundColor: '#111827',
           paddingTop: 8,
-          paddingBottom: 8,
-          height: 60,
+          paddingBottom: 40,
+          height: 80,
         },
         headerShown: false,
       }}>
@@ -27,12 +28,36 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
+        name="wallet"
+        options={{
+          title: 'Carteira',
+          tabBarIcon: ({ color, size }) => (
+            <MaterialIcons name="insert-chart-outlined" size={size} color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
         name="investments"
         options={{
-          title: 'Investimentos',
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="trending-up-outline" size={size} color={color} />
+          tabBarIcon: ({ focused }) => (
+            <View className="items-center">
+              <View
+                className={`-mt-6 h-14 w-14 items-center justify-center rounded-full ${
+                  focused ? 'bg-primary-dark' : 'bg-primary'
+                }`}
+                style={{
+                  shadowColor: '#000',
+                  shadowOffset: { width: 0, height: 4 },
+                  shadowOpacity: 0.3,
+                  shadowRadius: 4,
+                  elevation: 8,
+                }}>
+                <Ionicons name="trending-up-outline" size={30} color="#FFFFFF" />
+              </View>
+              <Text className="mt-2 w-full text-sm font-bold text-white">Investir</Text>
+            </View>
           ),
+          title: '',
         }}
       />
       <Tabs.Screen

@@ -174,3 +174,132 @@ export const useBankAccountsStore = create<BankAccountsState>((set, get) => ({
   getAccounts: () => get().accounts,
   getAccountById: (id: string) => get().accounts.find((account) => account.id === id),
 }));
+
+// Investment Management Store
+export interface UserInvestment {
+  id: string;
+  investmentId: number; // Reference to the investment opportunity
+  name: string;
+  amount: number;
+  expectedReturn: number;
+  dueDate: string;
+  category: string;
+  investmentDate: Date;
+  status: 'active' | 'completed' | 'cancelled';
+}
+
+export interface InvestmentState {
+  userInvestments: UserInvestment[];
+  addInvestment: (investment: Omit<UserInvestment, 'id' | 'investmentDate' | 'status'>) => void;
+  getUserInvestments: () => UserInvestment[];
+  getTotalInvested: () => number;
+  getWeightedAverageReturn: () => number;
+  getInvestmentById: (id: string) => UserInvestment | undefined;
+}
+
+// Initialize with existing mock investments but with proper structure
+const initialInvestments: UserInvestment[] = [
+  {
+    id: 'INV-1',
+    investmentId: 1,
+    name: 'Fundo Imobiliário Comercial',
+    amount: 5000, // Updated to match the initial transaction
+    expectedReturn: 12.5,
+    dueDate: '2025-12-31',
+    category: 'Imóveis',
+    investmentDate: new Date('2024-03-13T09:15:00'), // Match the initial transaction
+    status: 'active',
+  },
+];
+
+export const useInvestmentStore = create<InvestmentState>((set, get) => ({
+  userInvestments: initialInvestments,
+  
+  addInvestment: (investment) => {
+    const newInvestment: UserInvestment = {
+      ...investment,
+      id: `INV-${Date.now()}`,
+      investmentDate: new Date(),
+      status: 'active',
+    };
+    set((state) => ({
+      userInvestments: [...state.userInvestments, newInvestment],
+    }));
+  },
+  
+  getUserInvestments: () => get().userInvestments,
+  
+  getTotalInvested: () => {
+    return get().userInvestments
+      .filter(inv => inv.status === 'active')
+      .reduce((sum, inv) => sum + inv.amount, 0);
+  },
+  
+  getWeightedAverageReturn: () => {
+    const investments = get().userInvestments.filter(inv => inv.status === 'active');
+    const totalInvested = investments.reduce((sum, inv) => sum + inv.amount, 0);
+    
+    if (totalInvested === 0) return 0;
+    
+    return investments.reduce(
+      (sum, inv) => sum + (inv.amount * inv.expectedReturn), 0
+    ) / totalInvested;
+  },
+  
+  getInvestmentById: (id: string) => {
+    return get().userInvestments.find(inv => inv.id === id);
+  },
+}));
+
+// Investment opportunities data (this could be moved to a separate file)
+export interface InvestmentOpportunity {
+  id: number;
+  title: string;
+  risk: 'A' | 'B' | 'C' | 'D';
+  type: string;
+  instrument: string;
+  yield: string;
+  projectedYield?: string;
+  term: string;
+  payment: string;
+  openingDate?: string;
+  status?: string;
+  maxTarget: string;
+  minInvestment: number;
+  unitPrice: number;
+  image: any;
+}
+
+export const investmentOpportunities: InvestmentOpportunity[] = [
+  {
+    id: 1,
+    title: 'Mortgage - Renda Fixa Imobiliária (EUA) - Fluxo irregular',
+    risk: 'A',
+    type: 'Renda fixa',
+    instrument: 'Debênture',
+    yield: 'Dólar + 7% a.a.',
+    term: '48 meses',
+    payment: 'Fluxo irregular',
+    openingDate: 'Abertura em 18/06 às 13:00',
+    maxTarget: 'R$ 5.900.000,00',
+    minInvestment: 500,
+    unitPrice: 500,
+    image: require('../assets/investments1.jpg'),
+  },
+  {
+    id: 2,
+    title: 'Liv Primavera e Seleto Primavera - Parcelas Amortizadas - 36 meses',
+    risk: 'B',
+    type: 'Renda fixa',
+    instrument: 'CCB',
+    yield: '100% CDI + 6% a.a.',
+    projectedYield: '21.12% a.a. | 148% do CDI',
+    term: '36 meses',
+    payment: 'Parcelas amortizadas',
+    status: 'Captação esgotada',
+    maxTarget: 'R$ 1.000.000,00',
+    minInvestment: 1000,
+    unitPrice: 1000,
+    image: require('../assets/investments2.jpg'),
+  },
+];

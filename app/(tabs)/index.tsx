@@ -4,12 +4,21 @@ import { StyleSheet, View, Text, ScrollView, TouchableOpacity } from 'react-nati
 
 import { ScreenContent } from '~/components/ScreenContent';
 import { Ionicons } from '@expo/vector-icons';
-import { useFundsStore } from '~/store/store';
+import { useFundsStore, useInvestmentStore } from '~/store/store';
 
 export default function HomeScreen() {
   const [isFundsVisible, setIsFundsVisible] = useState(true);
   const { getFundsFormatted } = useFundsStore();
+  const { getUserInvestments, getTotalInvested } = useInvestmentStore();
+
   const availableFunds = getFundsFormatted();
+  const userInvestments = getUserInvestments().filter((inv) => inv.status === 'active');
+  const totalInvested = getTotalInvested();
+
+  // Calculate current value (mock calculation - in reality would be updated with market values)
+  const currentValue = totalInvested * 1.15; // Assuming 15% average growth
+  const totalReturn = currentValue - totalInvested;
+  const returnPercentage = totalInvested > 0 ? (totalReturn / totalInvested) * 100 : 0;
 
   const toggleFundsVisibility = () => {
     setIsFundsVisible(!isFundsVisible);
@@ -56,17 +65,23 @@ export default function HomeScreen() {
         <View className="space-y-4 rounded-2xl bg-background-light p-6 shadow-sm">
           <View className="flex-row items-center justify-between">
             <Text className="text-text-secondary">Total Investido</Text>
-            <Text className="text-lg font-semibold text-text">R$ 25.000,00</Text>
+            <Text className="text-lg font-semibold text-text">
+              {totalInvested.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+            </Text>
           </View>
           <View className="flex-row items-center justify-between">
             <Text className="text-text-secondary">Saldo Atual</Text>
-            <Text className="text-lg font-semibold text-text">R$ 28.995,00</Text>
+            <Text className="text-lg font-semibold text-text">
+              {currentValue.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+            </Text>
           </View>
           <View className="flex-row items-center justify-between">
             <Text className="text-text-secondary">Retorno Total</Text>
             <View className="space-y-1">
-              <Text className="text-lg font-semibold text-primary">+R$ 3.995,00</Text>
-              <Text className="text-sm text-primary">+15,98%</Text>
+              <Text className="text-lg font-semibold text-primary">
+                +{totalReturn.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+              </Text>
+              <Text className="text-sm text-primary">+{returnPercentage.toFixed(2)}%</Text>
             </View>
           </View>
         </View>
@@ -76,7 +91,9 @@ export default function HomeScreen() {
       <View className="px-6 py-2">
         <Text className="mb-4 text-xl font-bold text-text">Ações Rápidas</Text>
         <View className="flex-row justify-between">
-          <TouchableOpacity className="w-[30%] items-center rounded-xl bg-background-light p-4 shadow-sm">
+          <TouchableOpacity
+            className="w-[30%] items-center rounded-xl bg-background-light p-4 shadow-sm"
+            onPress={() => router.push('/(tabs)/investments')}>
             <View className="mb-2 h-12 w-12 items-center justify-center rounded-full bg-background-lighter">
               <Ionicons name="search" size={24} color="#10B981" />
             </View>
@@ -92,7 +109,7 @@ export default function HomeScreen() {
           </TouchableOpacity>
           <TouchableOpacity
             className="w-[30%] items-center rounded-xl bg-background-light p-4 shadow-sm"
-            onPress={() => router.push('/transactions')}>
+            onPress={() => router.push('/(tabs)/transactions')}>
             <View className="mb-2 h-12 w-12 items-center justify-center rounded-full bg-background-lighter">
               <Ionicons name="time" size={24} color="#10B981" />
             </View>
@@ -105,72 +122,83 @@ export default function HomeScreen() {
       <View className="px-6 py-6">
         <View className="mb-4 flex-row items-center justify-between">
           <Text className="text-xl font-bold text-text">Investimentos Ativos</Text>
-          <TouchableOpacity>
+          <TouchableOpacity onPress={() => router.push('/(tabs)/wallet')}>
             <Text className="text-primary">Ver Todos</Text>
           </TouchableOpacity>
         </View>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-          {/* Investment Card 1 */}
-          <View className="mb-4 mr-4 w-64 rounded-xl bg-background-light p-4 shadow-sm">
-            <View className="mb-3 flex-row items-start justify-between">
-              <View className="space-y-1">
-                <Text className="font-semibold text-text">Fundo Imobiliário</Text>
-                <Text className="text-sm text-text-muted">Imóvel Comercial</Text>
-              </View>
-              <View className="rounded bg-background-lighter px-2 py-1">
-                <Text className="text-xs font-medium text-primary">+12,5%</Text>
-              </View>
-            </View>
-            <View className="space-y-2">
-              <View className="flex-row justify-between">
-                <Text className="text-sm text-text-muted">Investido</Text>
-                <Text className="text-text">R$ 10.000,00</Text>
-              </View>
-              <View className="flex-row justify-between">
-                <Text className="text-sm text-text-muted">Valor Atual</Text>
-                <Text className="text-text">R$ 11.250,00</Text>
-              </View>
-              <View className="flex-row justify-between">
-                <Text className="text-sm text-text-muted">Vencimento</Text>
-                <Text className="text-text">12 meses</Text>
-              </View>
-            </View>
-          </View>
 
-          {/* Investment Card 2 */}
-          <View className="mb-4 w-64 rounded-xl bg-background-light p-4 shadow-sm">
-            <View className="mb-3 flex-row items-start justify-between">
-              <View className="space-y-1">
-                <Text className="font-semibold text-text">Venture Capital</Text>
-                <Text className="text-sm text-text-muted">Startup de Tecnologia</Text>
-              </View>
-              <View className="rounded bg-background-lighter px-2 py-1">
-                <Text className="text-xs font-medium text-primary">+18,3%</Text>
-              </View>
-            </View>
-            <View className="space-y-2">
-              <View className="flex-row justify-between">
-                <Text className="text-sm text-text-muted">Investido</Text>
-                <Text className="text-text">R$ 15.000,00</Text>
-              </View>
-              <View className="flex-row justify-between">
-                <Text className="text-sm text-text-muted">Valor Atual</Text>
-                <Text className="text-text">R$ 17.745,00</Text>
-              </View>
-              <View className="flex-row justify-between">
-                <Text className="text-sm text-text-muted">Vencimento</Text>
-                <Text className="text-text">24 meses</Text>
-              </View>
-            </View>
+        {userInvestments.length === 0 ? (
+          <View className="rounded-xl bg-background-light p-6 shadow-sm">
+            <Text className="text-center text-text-secondary">
+              Você ainda não possui investimentos ativos
+            </Text>
+            <TouchableOpacity
+              onPress={() => router.push('/(tabs)/investments')}
+              className="mt-3 rounded-xl bg-primary py-3">
+              <Text className="text-center font-semibold text-white">Explorar Oportunidades</Text>
+            </TouchableOpacity>
           </View>
-        </ScrollView>
+        ) : (
+          <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+            {userInvestments.slice(0, 3).map((investment) => {
+              // Mock current value calculation
+              const currentInvestmentValue = investment.amount * 1.125; // 12.5% growth
+              const investmentReturn = currentInvestmentValue - investment.amount;
+              const investmentReturnPercentage = (investmentReturn / investment.amount) * 100;
+
+              return (
+                <View
+                  key={investment.id}
+                  className="mb-4 mr-4 w-auto max-w-80 rounded-xl bg-background-light p-4 shadow-sm">
+                  <View className="mb-3 flex-row items-start justify-between gap-2">
+                    <View className="flex-shrink space-y-1">
+                      <Text className="font-semibold text-text">{investment.name}</Text>
+                      <Text className="text-sm text-text-muted">{investment.category}</Text>
+                    </View>
+                    <View className="rounded bg-background-lighter px-2 py-1">
+                      <Text className="text-xs font-medium text-primary">
+                        +{investmentReturnPercentage.toFixed(1)}%
+                      </Text>
+                    </View>
+                  </View>
+                  <View className="space-y-2">
+                    <View className="flex-row justify-between">
+                      <Text className="text-sm text-text-muted">Investido</Text>
+                      <Text className="text-text">
+                        {investment.amount.toLocaleString('pt-BR', {
+                          style: 'currency',
+                          currency: 'BRL',
+                        })}
+                      </Text>
+                    </View>
+                    <View className="flex-row justify-between">
+                      <Text className="text-sm text-text-muted">Valor Atual</Text>
+                      <Text className="text-text">
+                        {currentInvestmentValue.toLocaleString('pt-BR', {
+                          style: 'currency',
+                          currency: 'BRL',
+                        })}
+                      </Text>
+                    </View>
+                    <View className="flex-row justify-between">
+                      <Text className="text-sm text-text-muted">Vencimento</Text>
+                      <Text className="text-text">
+                        {new Date(investment.dueDate).toLocaleDateString('pt-BR')}
+                      </Text>
+                    </View>
+                  </View>
+                </View>
+              );
+            })}
+          </ScrollView>
+        )}
       </View>
 
       {/* Recent Transactions */}
       <View className="px-6 py-6">
         <View className="mb-4 flex-row items-center justify-between">
           <Text className="text-xl font-bold text-text">Transações Recentes</Text>
-          <TouchableOpacity onPress={() => router.push('/transactions')}>
+          <TouchableOpacity onPress={() => router.push('/(tabs)/transactions')}>
             <Text className="text-primary">Ver Todas</Text>
           </TouchableOpacity>
         </View>
@@ -178,56 +206,55 @@ export default function HomeScreen() {
           {/* Transaction 1 */}
           <View className="border-b border-border p-4">
             <View className="flex-row items-center justify-between">
-              <View className="flex-row items-center gap-2 space-x-3">
+              <View className="flex-shrink flex-row items-center gap-3">
                 <View className="h-10 w-10 items-center justify-center rounded-full bg-background-lighter">
-                  <Ionicons name="arrow-down" size={20} color="#10B981" />
+                  <Ionicons name="trending-up" size={20} color="#10B981" />
                 </View>
                 <View className="space-y-1">
-                  <Text className="font-medium text-text">Investimento Realizado</Text>
-                  <Text className="text-sm text-text-muted">Fundo Imobiliário</Text>
+                  <Text className="font-medium text-text">
+                    {userInvestments.length > 0
+                      ? 'Investimento Realizado'
+                      : 'Nenhuma transação recente'}
+                  </Text>
+                  <Text className="text-sm text-text-muted">
+                    {userInvestments.length > 0
+                      ? userInvestments[0]?.name || 'Investimento'
+                      : 'Adicione fundos ou faça um investimento'}
+                  </Text>
                 </View>
               </View>
-              <View className="items-end space-y-1">
-                <Text className="font-medium text-text">-R$ 10.000,00</Text>
-                <Text className="text-sm text-text-muted">há 2 dias</Text>
-              </View>
+              {userInvestments.length > 0 && (
+                <View className="items-end space-y-1">
+                  <Text className="font-medium text-text">
+                    -
+                    {userInvestments[0]?.amount.toLocaleString('pt-BR', {
+                      style: 'currency',
+                      currency: 'BRL',
+                    })}
+                  </Text>
+                  <Text className="text-sm text-text-muted">
+                    {userInvestments[0]?.investmentDate.toLocaleDateString('pt-BR')}
+                  </Text>
+                </View>
+              )}
             </View>
           </View>
 
           {/* Transaction 2 */}
-          <View className="border-b border-border p-4">
-            <View className="flex-row items-center justify-between">
-              <View className="flex-row items-center gap-2 space-x-3">
-                <View className="h-10 w-10 items-center justify-center rounded-full bg-background-lighter">
-                  <Ionicons name="arrow-up" size={20} color="#10B981" />
-                </View>
-                <View className="space-y-1">
-                  <Text className="font-medium text-text">Retorno Recebido</Text>
-                  <Text className="text-sm text-text-muted">Venture Capital</Text>
-                </View>
-              </View>
-              <View className="items-end space-y-1">
-                <Text className="font-medium text-primary">+R$ 2.745,00</Text>
-                <Text className="text-sm text-text-muted">há 5 dias</Text>
-              </View>
-            </View>
-          </View>
-
-          {/* Transaction 3 */}
           <View className="p-4">
             <View className="flex-row items-center justify-between">
-              <View className="flex-row items-center gap-2 space-x-3">
+              <View className="flex-shrink flex-row items-center gap-3">
                 <View className="h-10 w-10 items-center justify-center rounded-full bg-background-lighter">
                   <Ionicons name="add-circle" size={20} color="#10B981" />
                 </View>
                 <View className="space-y-1">
-                  <Text className="font-medium text-text">Fundos Adicionados</Text>
+                  <Text className="font-medium text-text">Depósito Inicial</Text>
                   <Text className="text-sm text-text-muted">Transferência Bancária</Text>
                 </View>
               </View>
               <View className="items-end space-y-1">
-                <Text className="font-medium text-text">+R$ 5.000,00</Text>
-                <Text className="text-sm text-text-muted">há 1 semana</Text>
+                <Text className="font-medium text-primary">+R$ 15.000,00</Text>
+                <Text className="text-sm text-text-muted">10/03/2024</Text>
               </View>
             </View>
           </View>
